@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <meta name="theme-color" content="#2b5e2b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Checklist Colheita">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <title>Checklist Colheita - Área de Vivência</title>
+    <!-- html2canvas para capturar a tela como imagem -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #eef5ea 0%, #d4e2cd 100%);
+            font-family: -apple-system, 'Segoe UI', 'Roboto', system-ui, 'Helvetica Neue', sans-serif;
+            padding: 12px 8px 40px;
+            color: #1e2a1f;
+            min-height: 100vh;
+        }
+
+        /* container principal - foco mobile */
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 6px 24px rgba(43,94,43,0.12);
+            overflow: hidden;
+            padding: 16px 12px 20px;
+        }
+
+        /* cabeçalho com turno integrado */
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #cfe3cb;
+            padding-bottom: 12px;
+            background: linear-gradient(135deg, #2b5e2b 0%, #1f4a1f 100%);
+            margin: -16px -12px 16px;
+            padding: 18px 12px 14px;
+            border-radius: 24px 24px 0 0;
+            border-bottom: none;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            font-weight: 800;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        .header .sub {
+            font-size: 0.8rem;
+            color: #d8ecd2;
+            margin-top: 4px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .turno-header {
+            display: inline-block;
+            padding: 7px 22px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            border: 2px solid rgba(255,255,255,0.25);
+            transition: background-color 0.2s ease;
+        }
+        /* Cores dos turnos */
+        .turno-header.turno-a {
+            background-color: #2e7d32;
+        }
+        .turno-header.turno-b {
+            background-color: #f57c00;
+        }
+        .turno-header.turno-c {
+            background-color: #1565c0;
+        }
+
+        /* Banner de instalação PWA */
+        .install-banner {
+            background: linear-gradient(135deg, #2b5e2b, #1f4a1f);
+            color: white;
+            padding: 14px 16px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            animation: slideDown 0.5s ease;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .install-banner p {
+            font-size: 0.85rem;
+            font-weight: 500;
+            flex: 1;
+        }
+        .install-banner button {
+            background: #ffc107;
+            color: #1e3a1e;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .install-banner button:active {
+            transform: scale(0.96);
+        }
+        .close-banner {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 30px;
+        }
+
+        /* Overlay de instalação obrigatória */
+        .install-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #1f4a1f, #2b5e2b 60%, #3f7d3f);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .install-card {
+            background: white;
+            border-radius: 24px;
+            padding: 28px 22px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+        }
+        .install-icon {
+            font-size: 3rem;
+            margin-bottom: 8px;
+        }
+        .install-card h2 {
+            color: #2b5e2b;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        .install-card p {
+            font-size: 0.9rem;
+            color: #3f5e3b;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .install-steps {
+            background: #f0f5ec;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 0.82rem;
+            color: #2c5e2c;
+        }
+        .install-card button {
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        /* seletor turno + frente - mobile friendly */
+        .top-selectors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            background: #f0f5ec;
+            padding: 12px;
+            border-radius: 24px;
+        }
+        .selector-group {
+            flex: 1;
+            min-width: 140px;
+        }
+        .selector-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #2c5e2c;
+            display: block;
+            margin-bottom: 6px;
+        }
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 50px;
+            border: 1px solid #bcd0b2;
+            background: white;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1e3a1e;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232c5e2c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+        }
+
+        /* operação fixa colheita */
+        .operacao-fixa {
+            background: #e9f3e3;
+            padding: 10px 16px;
+            border-radius: 60px;
+            margin: 10px 0 14px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #1f543f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* linha frota + data */
+        .row-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 12px 0 18px;
+            background: #f8faf5;
+            padding: 14px;
+            border-radius: 20px;
+        }
+        .info-field {
+            flex: 1;
+            min-width: 130px;
+        }
+        .info-field label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #3f5e3b;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .info-field input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbdcc6;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            background: white;
+        }
+
+        /* CHECKLIST EM GRID - 2 COLUNAS PARA LEGIBILIDADE NO CELULAR */
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 18px 0 20px;
+        }
+        
+        /* card de cada item - tamanhos ampliados para mobile */
+        .check-card {
+            background: #ffffff;
+            border: 1px solid #d9e6d0;
+            border-radius: 16px;
+            padding: 12px;
+            transition: background-color 0.15s ease, transform 0.1s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        
+        /* FUNDO VERDE CLARO para OK */
+        .check-card.status-ok {
+            background-color: #d4f5e3 !important;
+            border-left: 5px solid #2c7a2c;
+        }
+        /* FUNDO VERMELHO CLARO para NOK */
+        .check-card.status-nok {
+            background-color: #ffe0de !important;
+            border-left: 5px solid #c7362b;
+        }
+        .check-card.status-default {
+            background-color: #ffffff;
+        }
+
+        .item-num {
+            font-weight: 800;
+            font-size: 0.78rem;
+            color: #2b6e2b;
+            background: #eef3ea;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            margin-bottom: 8px;
+        }
+        .item-text {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #000000;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            min-height: 76px;
+        }
+        .radio-group-compact {
+            display: flex;
+            gap: 20px;
+            margin: 5px 0 5px;
+            justify-content: flex-start;
+        }
+        .radio-group-compact label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #000000;
+        }
+        input[type="radio"] {
+            transform: scale(1.3);
+            accent-color: #2c7a2c;
+            margin-right: 2px;
+        }
+
+        /* observações gerais */
+        .obs-geral {
+            margin: 18px 0 16px;
+        }
+        .obs-geral label {
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 8px;
+            color: #1e3a1e;
+        }
+        .obs-geral textarea {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid #bed0b6;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: #fefef5;
+        }
+
+        /* responsável SOMENTE do turno atual */
+        .responsavel-turno {
+            background: #f3f7ef;
+            border-radius: 28px;
+            padding: 16px;
+            margin: 12px 0 16px;
+        }
+        .resp-label {
+            font-weight: bold;
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 8px;
+            color: #2b532b;
+        }
+        .resp-label span {
+            background: #2c6e2c;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+        .responsavel-turno input {
+            width: 100%;
+            border: 1px solid #cbdcc6;
+            border-radius: 60px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0 10px;
+        }
+        button {
+            background: linear-gradient(135deg, #2c6e2c, #1f4a1f);
+            border: none;
+            color: white;
+            font-weight: 700;
+            padding: 15px 20px;
+            border-radius: 60px;
+            font-size: 1rem;
+            cursor: pointer;
+            flex: 1;
+            min-width: 150px;
+            box-shadow: 0 3px 10px rgba(43,94,43,0.3);
+            transition: 0.08s linear;
+            letter-spacing: 0.3px;
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        button.btn-secundary {
+            background: linear-gradient(135deg, #6f8a69, #50654b);
+            box-shadow: 0 3px 10px rgba(80,101,75,0.3);
+        }
+        button.btn-print {
+            background: linear-gradient(135deg, #ffb300, #ff8f00);
+            color: #2b2400;
+            box-shadow: 0 3px 10px rgba(255,143,0,0.35);
+        }
+
+        .footer-note {
+            font-size: 0.72rem;
+            text-align: center;
+            color: #6f7e69;
+            margin-top: 14px;
+            line-height: 1.5;
+        }
+
+        #captureArea {
+            background: white;
+            border-radius: 0 0 24px 24px;
+            overflow: visible;
+        }
+
+        /* Ajustes específicos para celular: mantém 2 colunas, ajusta fontes */
+        @media (max-width: 640px) {
+            .checklist-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .item-text {
+                font-size: 0.82rem;
+                min-height: 72px;
+            }
+            .radio-group-compact label {
+                font-size: 0.88rem;
+            }
+            .check-card {
+                padding: 11px;
+            }
+        }
+        
+        @media (max-width: 380px) {
+            .checklist-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .item-text {
+                font-size: 0.76rem;
+                min-height: 78px;
+            }
+            .radio-group-compact {
+                gap: 14px;
+            }
+            .radio-group-compact label {
+                font-size: 0.8rem;
+            }
+            .item-num {
+                font-size: 0.7rem;
+                padding: 3px 9px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .btn-group button {
+                font-size: 0.9rem;
+                padding: 12px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Overlay de instalação obrigatória ao abrir o app -->
+<div id="installOverlay" class="install-overlay">
+    <div class="install-card">
+        <div class="install-icon">🌾</div>
+        <h2>Checklist Colheita</h2>
+        <p>Para usar este aplicativo da melhor forma, <strong>instale-o na tela inicial do seu celular</strong>.</p>
+        <p class="install-steps" id="installSteps">
+            Toque no menu do navegador (⋮ ou ⬆️) e selecione <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong>.
+        </p>
+        <button id="installNowBtn">📲 Instalar Agora</button>
+        <button id="continueWebBtn" class="btn-secundary">Continuar no navegador</button>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Banner de instalação PWA -->
+    <div id="installBanner" class="install-banner" style="display: none;">
+        <p>📱 <strong>Instale o App!</strong> Tenha acesso rápido e offline.</p>
+        <button id="installBtn">Instalar Agora</button>
+        <button id="closeBannerBtn" class="close-banner">✕</button>
+    </div>
+
+    <!-- Área que será convertida em imagem -->
+    <div id="captureArea">
+        <div class="header">
+            <h1>🌾 ÁREA DE VIVÊNCIA</h1>
+            <div class="sub">Checklist Colheita</div>
+            <div class="turno-header" id="turnoHeaderLabel">Turno B</div>
+        </div>
+
+        <!-- Seletor Turno + Frente -->
+        <div class="top-selectors">
+            <div class="selector-group">
+                <label>📋 TURNO</label>
+                <select id="turnoSelect">
+                    <option value="A">Turno A</option>
+                    <option value="B" selected>Turno B</option>
+                    <option value="C">Turno C</option>
+                </select>
+            </div>
+            <div class="selector-group">
+                <label>🚧 FRENTE</label>
+                <select id="frenteSelect">
+                    <option value="FRENTE 08">FRENTE 08</option>
+                    <option value="FRENTE 10">FRENTE 10</option>
+                    <option value="FRENTE 11">FRENTE 11</option>
+                    <option value="FRENTE 12">FRENTE 12</option>
+                    <option value="FRENTE 13">FRENTE 13</option>
+                    <option value="FRENTE 14">FRENTE 14</option>
+                    <option value="FRENTE 15">FRENTE 15</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Operação fixa colheita -->
+        <div class="operacao-fixa">
+            🌾 OPERAÇÃO: COLHEITA
+        </div>
+
+        <!-- Frota e Data -->
+        <div class="row-info">
+            <div class="info-field"><label>🚜 Frota</label><input type="text" id="frota" placeholder="Ex: Frota 101"></div>
+            <div class="info-field"><label>📅 Data</label><input type="date" id="data" value=""></div>
+        </div>
+
+        <!-- CHECKLIST EM 4 COLUNAS -->
+        <div class="checklist-grid" id="checklistGrid"></div>
+
+        <!-- Observações Gerais -->
+        <div class="obs-geral">
+            <label>📝 Observações Gerais / Ações Tomadas</label>
+            <textarea id="obsGerais" rows="2" placeholder="Registrar qualquer intervenção ou ocorrência..."></textarea>
+        </div>
+
+        <!-- Responsável APENAS do turno atual -->
+        <div class="responsavel-turno" id="respContainer"></div>
+    </div>
+
+    <div class="btn-group">
+        <button id="shareImageBtn" class="btn-print">📲 COMPARTILHAR IMAGEM</button>
+        <button id="resetBtn" class="btn-secundary">🔄 LIMPAR TUDO</button>
+    </div>
+    <div class="footer-note">
+        ✅ Selecione turno + frente. Marque OK (fundo verde) ou NOK (fundo vermelho). Compartilhe direto no WhatsApp.
+    </div>
+</div>
+
+<script>
+    // ================== LISTA DE 16 ITENS ==================
+    const itens = [
+        "A área de vivência foi posicionada em local adequado, nivelado e próximo a operação?",
+        "Foi feito a limpeza entorno da área e devidamente sinalizada (Fitas, Cones, etc)?",
+        "Há disponibilidade de água na torneira da pia? Tem sabonete e papel toalha?",
+        "A limpeza e conservação está adequada?",
+        "Todas as lâmpadas estão funcionando corretamente (internas e externas)?",
+        "O kit de primeiros socorros está disponível e lacrado? Tem prancha?",
+        "Sanitários masculino e feminino estão limpos? Tem papel higiênico?",
+        "Há disponibilidade de água potável e fresca?",
+        "As lixeiras possuem tampas? O lixo foi coletado frequentemente?",
+        "Os armários estão em bom estado de conservação?",
+        "Há disponibilidade para reposição de materiais (Detergente, Sabonete, Toalha de Papel e Papel higiênico)?",
+        "As escadas de acesso e corrimão estão em boas condições?",
+        "Janelas, assento e mesa estão em boas condições?",
+        "Existem cones suficiente para distribuição na área?",
+        "Os compartimentos para ferramentas estão organizados?",
+        "O(s) extintor(es) está(ão) carregado(s) e dentro da validade?"
+    ];
+
+    // Estrutura de dados
+    let itemsData = [];
+    function initData() {
+        itemsData = [];
+        for (let i = 0; i < itens.length; i++) {
+            itemsData.push({
+                A: { status: null },
+                B: { status: null },
+                C: { status: null }
+            });
+        }
+    }
+    initData();
+
+    let currentTurno = "B";
+
+    const turnoSelect = document.getElementById("turnoSelect");
+    const turnoHeaderLabel = document.getElementById("turnoHeaderLabel");
+    const checklistGrid = document.getElementById("checklistGrid");
+    const respContainer = document.getElementById("respContainer");
+    const frenteSelect = document.getElementById("frenteSelect");
+    const frotaInput = document.getElementById("frota");
+    const dataInput = document.getElementById("data");
+    const obsGeraisText = document.getElementById("obsGerais");
+
+    function atualizarHeaderTurno() {
+        turnoHeaderLabel.innerText = `Turno ${currentTurno}`;
+        // Remove classes anteriores
+        turnoHeaderLabel.classList.remove('turno-a', 'turno-b', 'turno-c');
+        // Adiciona classe correspondente
+        if (currentTurno === 'A') {
+            turnoHeaderLabel.classList.add('turno-a');
+        } else if (currentTurno === 'B') {
+            turnoHeaderLabel.classList.add('turno-b');
+        } else if (currentTurno === 'C') {
+            turnoHeaderLabel.classList.add('turno-c');
+        }
+    }
+
+    function salvarLocalStorage() {
+        const storage = {
+            itemsData: itemsData,
+            currentTurno: currentTurno,
+            frente: frenteSelect.value,
+            frota: frotaInput.value,
+            data: dataInput.value,
+            obsGerais: obsGeraisText.value
+        };
+        localStorage.setItem("checklistColheitaMobileV7", JSON.stringify(storage));
+    }
+
+    function carregarLocalStorage() {
+        const saved = localStorage.getItem("checklistColheitaMobileV7");
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.itemsData) itemsData = data.itemsData;
+                if (data.currentTurno) {
+                    currentTurno = data.currentTurno;
+                    turnoSelect.value = currentTurno;
+                    atualizarHeaderTurno();
+                }
+                if (data.frente) frenteSelect.value = data.frente;
+                if (data.frota) frotaInput.value = data.frota;
+                if (data.data) dataInput.value = data.data;
+                if (data.obsGerais) obsGeraisText.value = data.obsGerais;
+            } catch(e) { console.warn(e); }
+        }
+        if (!dataInput.value) {
+            const today = new Date().toISOString().slice(0,10);
+            dataInput.value = today;
+        }
+        renderizarChecklist();
+        renderizarResponsavelTurno();
+    }
+
+    function aplicarClasseStatus(card, status) {
+        card.classList.remove('status-ok', 'status-nok', 'status-default');
+        if (status === 'ok') {
+            card.classList.add('status-ok');
+        } else if (status === 'nok') {
+            card.classList.add('status-nok');
+        } else {
+            card.classList.add('status-default');
+        }
+    }
+
+    function renderizarChecklist() {
+        if (!checklistGrid) return;
+        const turno = currentTurno;
+        checklistGrid.innerHTML = "";
+
+        for (let idx = 0; idx < itens.length; idx++) {
+            const itemText = itens[idx];
+            const turnoData = itemsData[idx][turno];
+            const statusValue = turnoData.status;
+
+            const card = document.createElement("div");
+            card.className = "check-card";
+            card.setAttribute("data-idx", idx);
+            aplicarClasseStatus(card, statusValue);
+
+            const numSpan = document.createElement("div");
+            numSpan.className = "item-num";
+            numSpan.innerText = `${idx+1}`;
+            card.appendChild(numSpan);
+
+            const textDiv = document.createElement("div");
+            textDiv.className = "item-text";
+            textDiv.innerText = itemText;
+            card.appendChild(textDiv);
+
+            const radioGroup = document.createElement("div");
+            radioGroup.className = "radio-group-compact";
+
+            const okLabel = document.createElement("label");
+            const okRadio = document.createElement("input");
+            okRadio.type = "radio";
+            okRadio.name = `item_${idx}_turno`;
+            okRadio.value = "OK";
+            okRadio.checked = (statusValue === "ok");
+            okRadio.addEventListener("change", (e) => {
+                if (e.target.checked) {
+                    itemsData[idx][turno].status = "ok";
+                    const nokRadio = card.querySelector(`input[value="NOK"]`);
+                    if (nokRadio) nokRadio.checked = false;
+                    aplicarClasseStatus(card, "ok");
+                    salvarLocalStorage();
+                }
+            });
+            okLabel.appendChild(okRadio);
+            okLabel.appendChild(document.createTextNode(" ✅ OK"));
+            radioGroup.appendChild(okLabel);
+
+            const nokLabel = document.createElement("label");
+            const nokRadio = document.createElement("input");
+            nokRadio.type = "radio";
+            nokRadio.name = `item_${idx}_turno`;
+            nokRadio.value = "NOK";
+            nokRadio.checked = (statusValue === "nok");
+            nokRadio.addEventListener("change", (e) => {
+                if (e.target.checked) {
+                    itemsData[idx][turno].status = "nok";
+                    const okRadioEl = card.querySelector(`input[value="OK"]`);
+                    if (okRadioEl) okRadioEl.checked = false;
+                    aplicarClasseStatus(card, "nok");
+                    salvarLocalStorage();
+                }
+            });
+            nokLabel.appendChild(nokRadio);
+            nokLabel.appendChild(document.createTextNode(" ❌ NOK"));
+            radioGroup.appendChild(nokLabel);
+
+            card.appendChild(radioGroup);
+            checklistGrid.appendChild(card);
+        }
+    }
+
+    function renderizarResponsavelTurno() {
+        if (!respContainer) return;
+        const turno = currentTurno;
+        let respValue = localStorage.getItem(`resp_turno_${turno}`) || "";
+        respContainer.innerHTML = `
+            <div class="resp-label">
+                👤 Responsável Inspeção (Turno ${turno}) 
+                <span>Assinar</span>
+            </div>
+            <input type="text" id="respTurnoInput" placeholder="Nome completo e assinatura" value="${escapeHtml(respValue)}">
+        `;
+        const respInput = document.getElementById("respTurnoInput");
+        if (respInput) {
+            respInput.addEventListener("input", (e) => {
+                localStorage.setItem(`resp_turno_${turno}`, e.target.value);
+                salvarLocalStorage();
+            });
+        }
+    }
+
+    function escapeHtml(str) {
+        if(!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function onChangeTurno() {
+        currentTurno = turnoSelect.value;
+        atualizarHeaderTurno();
+        renderizarChecklist();
+        renderizarResponsavelTurno();
+        salvarLocalStorage();
+    }
+
+    function resetAll() {
+        if (confirm("Limpar TODOS os dados (todos os turnos, observações e campos)?")) {
+            initData();
+            frotaInput.value = "";
+            const today = new Date().toISOString().slice(0,10);
+            dataInput.value = today;
+            obsGeraisText.value = "";
+            localStorage.removeItem("resp_turno_A");
+            localStorage.removeItem("resp_turno_B");
+            localStorage.removeItem("resp_turno_C");
+            renderizarChecklist();
+            renderizarResponsavelTurno();
+            salvarLocalStorage();
+        }
+    }
+
+    async function compartilharImagem() {
+        const element = document.getElementById("captureArea");
+        if (!element) return;
+        salvarLocalStorage();
+        const btn = document.getElementById("shareImageBtn");
+        const originalText = btn.innerText;
+        btn.innerText = "📸 Gerando imagem...";
+        btn.disabled = true;
+        try {
+            await new Promise(resolve => setTimeout(resolve, 80));
+            // Garante captura COMPLETA do elemento, sem cortes,
+            // independente do scroll/viewport do celular.
+            const fullWidth = Math.max(element.scrollWidth, element.offsetWidth, element.clientWidth);
+            const fullHeight = Math.max(element.scrollHeight, element.offsetHeight, element.clientHeight);
+            const canvas = await html2canvas(element, {
+                scale: 2.6,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: false,
+                width: fullWidth,
+                height: fullHeight,
+                windowWidth: fullWidth,
+                windowHeight: fullHeight,
+                scrollX: 0,
+                scrollY: 0
+            });
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) throw new Error("Falha ao gerar blob");
+            const file = new File([blob], `checklist_colheita_turno_${currentTurno}.png`, { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    title: 'Checklist Área de Vivência',
+                    text: `Checklist Colheita - Turno ${currentTurno} - ${frenteSelect.value}`,
+                    files: [file]
+                });
+                alert("✅ Compartilhado com sucesso!");
+            } else {
+                const link = document.createElement('a');
+                link.download = `checklist_colheita_turno_${currentTurno}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                alert("📸 Imagem salva. Envie pelo WhatsApp.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("❌ Erro ao compartilhar. Tentando salvar...");
+            try {
+                const fullWidth = Math.max(element.scrollWidth, element.offsetWidth);
+                const fullHeight = Math.max(element.scrollHeight, element.offsetHeight);
+                const canvas = await html2canvas(element, {
+                    scale: 2.5,
+                    backgroundColor: '#ffffff',
+                    width: fullWidth,
+                    height: fullHeight,
+                    windowWidth: fullWidth,
+                    windowHeight: fullHeight
+                });
+                const link = document.createElement('a');
+                link.download = `checklist_colheita_turno_${currentTurno}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch(e) { alert("Erro crítico."); }
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // ================== PWA - Instalação Forçada ==================
+    let deferredPrompt;
+    const installBanner = document.getElementById('installBanner');
+    const installBtn = document.getElementById('installBtn');
+    const closeBannerBtn = document.getElementById('closeBannerBtn');
+    const installOverlay = document.getElementById('installOverlay');
+    const installNowBtn = document.getElementById('installNowBtn');
+    const continueWebBtn = document.getElementById('continueWebBtn');
+    const installSteps = document.getElementById('installSteps');
+
+    function isStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches ||
+               window.navigator.standalone === true;
+    }
+
+    function detectarPlataforma() {
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        if (/iPhone|iPad|iPod/i.test(ua)) {
+            return 'Toque no botão Compartilhar (□↑) na barra do Safari e depois em "Adicionar à Tela de Início".';
+        }
+        if (/android/i.test(ua)) {
+            return 'Toque no menu (⋮) do navegador e depois em "Instalar aplicativo" ou "Adicionar à tela inicial".';
+        }
+        return 'Toque no menu do navegador e selecione "Adicionar à tela inicial" ou "Instalar app".';
+    }
+
+    // Mostra o overlay sempre que o app NÃO estiver instalado (rodando no navegador)
+    if (isStandalone()) {
+        installOverlay.style.display = 'none';
+    } else {
+        installSteps.innerHTML = detectarPlataforma();
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (!isStandalone()) {
+            installBanner.style.display = 'flex';
+        }
+    });
+
+    window.addEventListener('appinstalled', () => {
+        installBanner.style.display = 'none';
+        installOverlay.style.display = 'none';
+        deferredPrompt = null;
+    });
+
+    async function dispararInstalacao() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                installBanner.style.display = 'none';
+                installOverlay.style.display = 'none';
+            }
+            deferredPrompt = null;
+        } else {
+            alert(detectarPlataforma());
+        }
+    }
+
+    installBtn.addEventListener('click', dispararInstalacao);
+    installNowBtn.addEventListener('click', dispararInstalacao);
+
+    continueWebBtn.addEventListener('click', () => {
+        installOverlay.style.display = 'none';
+    });
+
+    closeBannerBtn.addEventListener('click', () => {
+        installBanner.style.display = 'none';
+    });
+
+    if (isStandalone()) {
+        installBanner.style.display = 'none';
+    }
+
+    function bindEvents() {
+        turnoSelect.addEventListener("change", onChangeTurno);
+        frenteSelect.addEventListener("change", () => salvarLocalStorage());
+        frotaInput.addEventListener("input", () => salvarLocalStorage());
+        dataInput.addEventListener("input", () => salvarLocalStorage());
+        obsGeraisText.addEventListener("input", () => salvarLocalStorage());
+        document.getElementById("shareImageBtn").addEventListener("click", compartilharImagem);
+        document.getElementById("resetBtn").addEventListener("click", resetAll);
+        setInterval(() => salvarLocalStorage(), 2500);
+    }
+
+    function init() {
+        carregarLocalStorage();
+        bindEvents();
+        atualizarHeaderTurno();
+    }
+    init();
+</script>
+
+<!-- Service Worker Registration -->
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker registrado'))
+            .catch(err => console.warn('SW falhou:', err));
+    }
+</script>
+</body>
+</html>
