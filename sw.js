@@ -2,7 +2,7 @@ const CACHE_NAME = 'checklist-colheita-v1';
 
 function precacheAssets() {
   const urls = [
-    './Checklist_Vivencia.html',
+    './index.html',
     './manifest.json',
     'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'
   ];
